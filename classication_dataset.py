@@ -51,7 +51,7 @@ class ClassificationDataset(Dataset):
         label = torch.tensor(label, dtype=torch.long)
         image = self.transform(image)
 
-        return image, label
+        return image,  label, _id
 
 
 # Function to get data loaders for train, validation, and test splits

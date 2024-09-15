@@ -92,7 +92,7 @@ def train_model(model, train_loader, val_loader, cuda_device, model_save_path="m
         model.train()
         running_loss = 0.0
 
-        for inputs, labels in tqdm(train_loader, desc=f"Training for epoch {epoch}"):
+        for inputs, labels, _ in tqdm(train_loader, desc=f"Training for epoch {epoch}"):
             inputs = inputs.to(device)
             labels = labels.to(device)
 
@@ -111,7 +111,7 @@ def train_model(model, train_loader, val_loader, cuda_device, model_save_path="m
         model.eval()  # Set the model to evaluation mode
         val_loss = 0.0
         with torch.no_grad():  # No gradients needed
-            for inputs, labels in val_loader:
+            for inputs, labels, _ in val_loader:
 
                 inputs = inputs.to(device)
                 labels = labels.to(device)
@@ -139,8 +139,6 @@ def train_model(model, train_loader, val_loader, cuda_device, model_save_path="m
         else:
             patience_counter -= 1
             print(f"No progress on val loss was made, patience reduced to {patience_counter}.")
-
-
 
         if patience_counter == 0:
             if max_lr_changes == 0:
