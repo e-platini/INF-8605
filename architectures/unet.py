@@ -110,10 +110,10 @@ def train_model(model, train_loader, val_loader, cuda_device, model_save_path="m
 
         for inputs, labels in tqdm(train_loader, desc=f"Training for epoch {epoch}"):
             inputs = inputs.to(device)
-            labels = labels.to(device)
+            labels = labels.squeeze(3).to(device)
 
             optimizer.zero_grad()  # Zero the parameter gradients
-            outputs = model(inputs)  # Forward pass
+            outputs = model(inputs).squeeze(1)  # Forward pass
             loss = criterion(outputs, labels)  # Compute loss
             loss.backward()  # Backward pass
             optimizer.step()  # Optimize weights

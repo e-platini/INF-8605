@@ -47,7 +47,7 @@ class SegmentationDataset(Dataset):
         image = Image.open(img_name).convert('RGB')  # Open the image and convert it to RGB
         seg_mask = np.load(os.path.join(self.mask_dir, str(_id) + ".npy"))
 
-        seg_mask = torch.tensor(seg_mask, dtype=torch.long)
+        seg_mask = torch.tensor(seg_mask)#, dtype=torch.long)
         image = self.transform(image)
 
         return image,  seg_mask
