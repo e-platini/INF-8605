@@ -30,8 +30,8 @@ class ClassificationDataset(Dataset):
         self.transform = transforms.Compose([
             transforms.RandomHorizontalFlip(0.5),
             transforms.RandomVerticalFlip(0.5),
-            #transforms.ColorJitter(brightness=(0, 0.2), contrast=(0, 0.2), saturation=(0, 0.2), hue=(0, 0.2)),
-            #transforms.RandomApply(torch.nn.ModuleList([transforms.GaussianBlur(kernel_size=5, sigma=(0.1, 0.3)),]), p=0.3),
+            #transforms.RandomApply(torch.nn.ModuleList([transforms.ColorJitter(brightness=(0, 0.15), contrast=(0, 0.15), saturation=(0, 0.15), hue=(0, 0.15)),]), p=0.3),
+            #transforms.RandomApply(torch.nn.ModuleList([transforms.GaussianBlur(kernel_size=5, sigma=(0.1, 0.2)),]), p=0.3),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])  # Imagenet weights
         ])

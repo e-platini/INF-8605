@@ -62,13 +62,13 @@ class SimpleCNN(nn.Module):
 
         return x
 
-def train_model(model, train_loader, val_loader, model_save_path="models/simple_CNN", learning_rate=0.001):
+def train_model(model, train_loader, val_loader, cuda_device, model_save_path="models/simple_CNN", learning_rate=0.001):
     # USER PARAMETERS
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     num_epochs = 1000
     max_patience = 3
-    max_lr_changes = 4
+    max_lr_changes = 3
     threshold_patience = 0.005
     ratio_lr_change = 0.1
     # ratio_threshold_patience_change = 0.5
@@ -82,7 +82,7 @@ def train_model(model, train_loader, val_loader, model_save_path="models/simple_
     if not torch.cuda.is_available():
         raise RuntimeError("GPU is not available, good luck")
     else:
-        device = torch.device("cuda:0")
+        device = torch.device(cuda_device)
 
     model.to(device)
 
@@ -144,7 +144,7 @@ def train_model(model, train_loader, val_loader, model_save_path="models/simple_
 
         if patience_counter == 0:
             if max_lr_changes == 0:
-                print(f'Final val loss: {val_loss}')
+                print(f'Best val loss: {best_val_loss}')
                 print(f"Stopping training.")
                 plt.plot(train_loss_plot, label='Train Loss')
                 plt.plot(val_loss_plot, label='Validation Loss')
