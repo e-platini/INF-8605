@@ -63,7 +63,7 @@ class SimpleCNN(nn.Module):
 class VGG16Binary(nn.Module):
     def __init__(self):
         super(VGG16Binary, self).__init__()
-        self.vgg = models.vgg16(pretrained=True)
+        self.vgg = models.vgg16(weights='IMAGENET1K_V1')
         self.vgg.classifier[6] = nn.Linear(4096, 2)  # Modify output layer for binary classification
 
     def forward(self, x):
@@ -74,7 +74,7 @@ class VGG16Binary(nn.Module):
 class ResNet18Binary(nn.Module):
     def __init__(self):
         super(ResNet18Binary, self).__init__()
-        self.resnet = models.resnet18(pretrained=True)
+        self.resnet = models.resnet18(weights='IMAGENET1K_V1')
         self.resnet.fc = nn.Linear(self.resnet.fc.in_features, 2)  # Modify output layer
 
     def forward(self, x):
@@ -85,7 +85,7 @@ class ResNet18Binary(nn.Module):
 class SqueezeNetBinary(nn.Module):
     def __init__(self):
         super(SqueezeNetBinary, self).__init__()
-        self.squeezenet = models.squeezenet1_0(pretrained=True)
+        self.squeezenet = models.squeezenet1_0(weights='IMAGENET1K_V1')
         self.squeezenet.classifier[1] = nn.Conv2d(512, 2, kernel_size=(1, 1), stride=(1, 1))
 
     def forward(self, x):
