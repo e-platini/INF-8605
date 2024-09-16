@@ -1,5 +1,3 @@
-
-import torchvision.transforms.functional as TF
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -7,78 +5,7 @@ from tqdm import tqdm
 from matplotlib import pyplot as plt
 
 
-class DoubleConv(nn.Module):
-    def __init__(self, in_channels, out_channels):
-        super(DoubleConv, self).__init__()
-        self.conv = nn.Sequential(
-            nn.Conv2d(in_channels, out_channels, 3, 1, 1, bias=False),
-            nn.BatchNorm2d(out_channels),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(out_channels, out_channels, 3, 1, 1, bias=False),
-            nn.BatchNorm2d(out_channels),
-            nn.ReLU(inplace=True),
-        )
-
-    def forward(self, x):
-        return self.conv(x)
-
-
-class Unet(nn.Module):
-    def __init__(
-            self, in_channels=3, out_channels=1, features=[64, 128, 256, 512],
-    ):
-        super(Unet, self).__init__()
-        self.ups = nn.ModuleList()
-        self.downs = nn.ModuleList()
-        self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
-
-        # Down part of UNET
-        for feature in features:
-            self.downs.append(DoubleConv(in_channels, feature))
-            in_channels = feature
-
-        # Up part of UNET
-        for feature in reversed(features):
-            self.ups.append(
-                nn.ConvTranspose2d(
-                    feature*2, feature, kernel_size=2, stride=2,
-                )
-            )
-            self.ups.append(DoubleConv(feature*2, feature))
-
-        self.bottleneck = DoubleConv(features[-1], features[-1]*2)
-        self.final_conv = nn.Conv2d(features[0], out_channels, kernel_size=1)
-
-    def forward(self, x):
-        skip_connections = []
-
-        for down in self.downs:
-            x = down(x)
-            skip_connections.append(x)
-            x = self.pool(x)
-
-        x = self.bottleneck(x)
-        # We inverse the list because skip connections were added going
-        # down and now we go up
-        skip_connections = skip_connections[::-1]
-
-        # We go 2 steps at a time because there is one step for upconv
-        # and one step for doubleconv in the ups list
-        for idx in range(0, len(self.ups), 2):
-            x = self.ups[idx](x)
-            # The skip connection is after the upconv
-            # We go through the skip connection list 1 step at a time not 2...
-            skip_connection = skip_connections[idx//2]
-
-            if x.shape != skip_connection.shape:
-                x = TF.resize(x, size=skip_connection.shape[2:])
-
-            concat_skip = torch.cat((skip_connection, x), dim=1)
-            x = self.ups[idx+1](concat_skip)
-
-        return self.final_conv(x)
-
-def train_model(model, train_loader, val_loader, cuda_device, model_save_path="models/simple_CNN", learning_rate=0.001):
+def train_segmentation_model(model, train_loader, val_loader, cuda_device, model_save_path="models/simple_CNN", learning_rate=0.001):
     # USER PARAMETERS
     criterion = nn.BCEWithLogitsLoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
@@ -93,6 +20,7 @@ def train_model(model, train_loader, val_loader, cuda_device, model_save_path="m
     val_loss_plot = []
     # Just so it is always higher than the first actual loss...
     best_val_loss = 9999
+    epoch_best_val_loss = -1
     patience_counter = max_patience
 
     if not torch.cuda.is_available():
@@ -149,16 +77,17 @@ def train_model(model, train_loader, val_loader, cuda_device, model_save_path="m
                 patience_counter = max_patience
             else:
                 patience_counter -= 1
-                print(f"Progress on val loss was inferior to {threshold_patience}, patience reduced to {patience_counter}.")
+                print(f"Progress on best val loss ({best_val_loss}) was inferior to {threshold_patience}, patience reduced to {patience_counter}.")
             best_val_loss = val_loss
+            epoch_best_val_loss = epoch
             torch.save(model.state_dict(), model_save_path)
         else:
             patience_counter -= 1
-            print(f"No progress on val loss was made, patience reduced to {patience_counter}.")
+            print(f"No progress on best val loss ({best_val_loss}) was made, patience reduced to {patience_counter}.")
 
         if patience_counter == 0:
             if max_lr_changes == 0:
-                print(f'Best val loss: {best_val_loss} at epoch {best_val_loss}')
+                print(f'Best val loss: {best_val_loss} at epoch {epoch_best_val_loss}')
                 print(f"Stopping training.")
                 plt.plot(train_loss_plot, label='Train Loss')
                 plt.plot(val_loss_plot, label='Validation Loss')
