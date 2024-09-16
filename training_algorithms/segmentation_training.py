@@ -5,7 +5,7 @@ from tqdm import tqdm
 from matplotlib import pyplot as plt
 
 
-def train_segmentation_model(model, train_loader, val_loader, cuda_device, model_save_path="models/simple_CNN", learning_rate=0.001):
+def train_segmentation_model(model, train_loader, val_loader, cuda_device, model_save_path, learning_rate=0.001):
     # USER PARAMETERS
     criterion = nn.BCEWithLogitsLoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
