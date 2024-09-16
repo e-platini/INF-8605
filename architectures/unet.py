@@ -158,7 +158,7 @@ def train_model(model, train_loader, val_loader, cuda_device, model_save_path="m
 
         if patience_counter == 0:
             if max_lr_changes == 0:
-                print(f'Best val loss: {best_val_loss}')
+                print(f'Best val loss: {best_val_loss} at epoch {best_val_loss}')
                 print(f"Stopping training.")
                 plt.plot(train_loss_plot, label='Train Loss')
                 plt.plot(val_loss_plot, label='Validation Loss')

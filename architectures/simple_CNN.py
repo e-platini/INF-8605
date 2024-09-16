@@ -67,7 +67,7 @@ def train_model(model, train_loader, val_loader, cuda_device, model_save_path="m
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     num_epochs = 1000
-    max_patience = 3
+    max_patience = 5
     max_lr_changes = 3
     threshold_patience = 0.005
     ratio_lr_change = 0.1
@@ -77,6 +77,7 @@ def train_model(model, train_loader, val_loader, cuda_device, model_save_path="m
     val_loss_plot = []
     # Just so it is always higher than the first actual loss...
     best_val_loss = 9999
+    epoch_best_val_loss = -1
     patience_counter = max_patience
 
     if not torch.cuda.is_available():
@@ -133,16 +134,17 @@ def train_model(model, train_loader, val_loader, cuda_device, model_save_path="m
                 patience_counter = max_patience
             else:
                 patience_counter -= 1
-                print(f"Progress on val loss was inferior to {threshold_patience}, patience reduced to {patience_counter}.")
+                print(f"Progress on best val loss ({best_val_loss}) was inferior to {threshold_patience}, patience reduced to {patience_counter}.")
             best_val_loss = val_loss
+            epoch_best_val_loss = epoch
             torch.save(model.state_dict(), model_save_path)
         else:
             patience_counter -= 1
-            print(f"No progress on val loss was made, patience reduced to {patience_counter}.")
+            print(f"No progress on best val loss ({best_val_loss}) was made, patience reduced to {patience_counter}.")
 
         if patience_counter == 0:
             if max_lr_changes == 0:
-                print(f'Best val loss: {best_val_loss}')
+                print(f'Best val loss: {best_val_loss} at epoch {epoch_best_val_loss}')
                 print(f"Stopping training.")
                 plt.plot(train_loss_plot, label='Train Loss')
                 plt.plot(val_loss_plot, label='Validation Loss')
