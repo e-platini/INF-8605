@@ -27,10 +27,11 @@ class SegmentationDataset(Dataset):
 
         # Define transformations
         self.transform = transforms.Compose([
-            #transforms.RandomHorizontalFlip(0.5),
-            #transforms.RandomVerticalFlip(0.5),
-            #transforms.RandomApply(torch.nn.ModuleList([transforms.ColorJitter(brightness=(0, 0.15), contrast=(0, 0.15), saturation=(0, 0.15), hue=(0, 0.15)),]), p=0.3),
-            #transforms.RandomApply(torch.nn.ModuleList([transforms.GaussianBlur(kernel_size=5, sigma=(0.1, 0.2)),]), p=0.3),
+            transforms.RandomHorizontalFlip(0.5),
+            transforms.RandomVerticalFlip(0.5),
+            #transforms.RandomApply(torch.nn.ModuleList([transforms.ColorJitter(brightness=(0, 0.05), contrast=(0, 0.05), saturation=(0, 0.05), hue=(0, 0.05)),]), p=0.3),
+            transforms.RandomApply(torch.nn.ModuleList([transforms.GaussianBlur(kernel_size=5, sigma=(0.1, 0.11)),]), p=0.2),
+            transforms.RandomGrayscale(0.2),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])  # Imagenet weights
         ])
@@ -50,7 +51,7 @@ class SegmentationDataset(Dataset):
         seg_mask = torch.tensor(seg_mask)#, dtype=torch.long)
         image = self.transform(image)
 
-        return image,  seg_mask
+        return image, seg_mask, _id
 
 
 # Function to get data loaders for train, validation, and test splits

@@ -10,7 +10,7 @@ def train_segmentation_model(model, train_loader, val_loader, cuda_device, model
     criterion = nn.BCEWithLogitsLoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     num_epochs = 1000
-    max_patience = 3
+    max_patience = 5
     max_lr_changes = 3
     threshold_patience = 0.005
     ratio_lr_change = 0.1
@@ -36,7 +36,7 @@ def train_segmentation_model(model, train_loader, val_loader, cuda_device, model
         model.train()
         running_loss = 0.0
 
-        for inputs, labels in tqdm(train_loader, desc=f"Training for epoch {epoch}"):
+        for inputs, labels, _ in tqdm(train_loader, desc=f"Training for epoch {epoch}"):
             inputs = inputs.to(device)
             labels = labels.squeeze(3).to(device)
 
@@ -55,12 +55,12 @@ def train_segmentation_model(model, train_loader, val_loader, cuda_device, model
         model.eval()  # Set the model to evaluation mode
         val_loss = 0.0
         with torch.no_grad():  # No gradients needed
-            for inputs, labels in val_loader:
+            for inputs, labels, _ in val_loader:
 
                 inputs = inputs.to(device)
-                labels = labels.to(device)
+                labels = labels.squeeze(3).to(device)
 
-                outputs = model(inputs)
+                outputs = model(inputs).squeeze(1)
 
                 loss = criterion(outputs, labels)
 

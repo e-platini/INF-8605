@@ -10,7 +10,7 @@ def train_classification_model(model, train_loader, val_loader, cuda_device, mod
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     num_epochs = 1000
-    max_patience = 5
+    max_patience = 3
     max_lr_changes = 3
     threshold_patience = 0.005
     ratio_lr_change = 0.1
